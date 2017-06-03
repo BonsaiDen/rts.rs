@@ -111,8 +111,8 @@ impl Terrain {
 
     pub fn has_tile(&self, tile: u32) -> bool {
         self.is_group_tile(tile)
-            || self.standalone.iter().find(|v| **v == tile).is_some()
-            || self.reduced.iter().find(|v| **v == tile).is_some()
+            || self.standalone.iter().any(|v| *v == tile)
+            || self.reduced.iter().any(|v| *v == tile)
     }
 
     fn reduced_tile(&self, x: u32, y: u32) -> u32 {
@@ -126,7 +126,7 @@ impl Terrain {
     }
 
     fn is_group_tile(&self, tile: u32) -> bool {
-        self.group.iter().find(|v| **v == tile).is_some()
+        self.group.iter().any(|v| *v == tile)
     }
 
     fn to_flags(&self, tiles: [u32; 8]) -> [bool; 8] {
@@ -225,19 +225,19 @@ impl Terrain {
         }
 
         // Diagonal top right
-        if border & 1 + 4 == 1 + 4 {
+        if border & (1 + 4) == 1 + 4 {
             self.group[2]
 
         // Diagonal bottom right
-        } else if border & 4 + 16 == 4 + 16 {
+        } else if border & (4 + 16) == 4 + 16 {
             self.group[8]
 
         // Diagonal bottom left
-        } else if border & 16 + 64 == 16 + 64 {
+        } else if border & (16 + 64) == 16 + 64 {
             self.group[6]
 
         // Diagonal top right
-        } else if border & 64 + 1 == 64 + 1 {
+        } else if border & (64 + 1) == 64 + 1 {
             self.group[0]
 
         // Top

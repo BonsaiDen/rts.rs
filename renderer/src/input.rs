@@ -143,10 +143,10 @@ impl ButtonState {
 
     pub fn position(&self) -> (i32, i32) {
         match *self {
-            ButtonState::WasPressed(x, y) => (x, y),
-            ButtonState::Pressed(x, y) => (x, y),
-            ButtonState::WasReleased(x, y) => (x, y),
-            ButtonState::Released(x, y) => (x, y)
+            ButtonState::WasPressed(x, y)
+            | ButtonState::Pressed(x, y)
+            | ButtonState::WasReleased(x, y)
+            | ButtonState::Released(x, y) => (x, y)
         }
     }
 

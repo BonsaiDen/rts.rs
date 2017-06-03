@@ -7,23 +7,18 @@
 // except according to those terms.
 
 
-// Crates ---------------------------------------------------------------------
-extern crate renderer;
+// STD Dependencies -----------------------------------------------------------
 
-extern crate serde;
-extern crate serde_xml_rs;
-#[macro_use]
-extern crate serde_derive;
+
+// External Dependencies ------------------------------------------------------
 
 
 // Internal Dependencies ------------------------------------------------------
-mod terrain;
-mod tiledata;
-mod tilegrid;
-mod tileset;
 
-pub use self::terrain::Terrain;
-pub use self::tiledata::TileData;
-pub use self::tilegrid::TileGrid;
-pub use self::tileset::TileSet;
+
+// Animation Abstraction --------------------------------------------------------
+#[derive(Debug)]
+pub struct Animation {
+
+}
 

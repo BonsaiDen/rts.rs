@@ -8,10 +8,13 @@
 
 
 // Crates ---------------------------------------------------------------------
+#[macro_use]
 extern crate gfx;
 extern crate gfx_window_glutin;
 extern crate gfx_device_gl;
 extern crate glutin;
+extern crate image;
+
 
 
 // STD Dependencies -----------------------------------------------------------
@@ -31,25 +34,33 @@ use glutin::{
 
 // Internal Dependencies ------------------------------------------------------
 mod input;
+mod quadview;
+mod texture;
+
 use input::{ButtonState, KeyState};
+
 pub use input::{Key, Keyboard, Button, Mouse};
+pub use quadview::{QuadView, Vertex};
+pub use texture::Texture;
+
+
+// Type Abstractions ----------------------------------------------------------
+pub type ColorBuffer = gfx::handle::RenderTargetView<gfx_device_gl::Resources, (gfx::format::R8_G8_B8_A8, gfx::format::Srgb)>;
+pub type Encoder = gfx::Encoder<gfx_device_gl::Resources, gfx_device_gl::CommandBuffer>;
+pub type Factory = gfx_device_gl::Factory;
 
 
 // Traits ---------------------------------------------------------------------
 pub trait Renderable {
     fn tick(&mut self) where Self: Sized;
-    fn draw(&mut self, encoder: &mut gfx::Encoder<
-        gfx_device_gl::Resources,
-        gfx_device_gl::CommandBuffer
-
-    >, &Keyboard, &Mouse) where Self: Sized;
+    fn draw(&mut self, encoder: &mut Encoder, &Keyboard, &Mouse) where Self: Sized;
 }
 
 pub struct RenderTarget {
-    pub factory: gfx_device_gl::Factory,
+    pub factory: Factory,
     pub width: u32,
     pub height: u32,
-    pub color: gfx::handle::RenderTargetView<gfx_device_gl::Resources, (gfx::format::R8_G8_B8_A8, gfx::format::Srgb)>
+    pub color: ColorBuffer
 }
 
 // Public Interface -----------------------------------------------------------

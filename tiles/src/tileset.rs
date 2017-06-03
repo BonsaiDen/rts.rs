@@ -15,12 +15,12 @@ use std::collections::HashMap;
 
 
 // External Dependencies ------------------------------------------------------
-use gfx_device_gl;
+use renderer::Factory;
 use serde_xml_rs::deserialize;
+use renderer::Texture;
 
 
 // Internal Dependencies ------------------------------------------------------
-use ::texture::Texture;
 use ::terrain::Terrain;
 
 
@@ -35,7 +35,7 @@ pub struct TileSet {
 
 impl TileSet {
 
-    pub fn new(factory: &mut gfx_device_gl::Factory, path: &Path) -> Result<Self, Box<Error>> {
+    pub fn new(factory: &mut Factory, path: &Path) -> Result<Self, Box<Error>> {
 
         let file = File::open(path)?;
         let set: Set = deserialize(file)?;
@@ -52,7 +52,7 @@ impl TileSet {
             if let Ok(tile_index) = t.id.parse::<u32>() {
 
                 // Parse edge data
-                let edges: Vec<Option<u32>> = t.terrain.split(",").map(|e| {
+                let edges: Vec<Option<u32>> = t.terrain.split(',').map(|e| {
                     e.parse::<u32>().ok()
 
                 }).collect();
@@ -93,14 +93,14 @@ impl TileSet {
                     id: tile.0,
                     name: typ.name.to_string(),
                     standalone: standalone.map(|p| {
-                        p.value.split(",").filter_map(|v| {
+                        p.value.split(',').filter_map(|v| {
                             v.parse::<u32>().ok()
 
                         }).collect()
 
                     }).unwrap_or_else(Vec::new),
                     reduced: reduced.map(|p| {
-                        p.value.split(",").filter_map(|v| {
+                        p.value.split(',').filter_map(|v| {
                             v.parse::<u32>().ok()
 
                         }).collect()

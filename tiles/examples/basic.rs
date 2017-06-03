@@ -8,10 +8,7 @@
 
 
 // Crates ---------------------------------------------------------------------
-extern crate image;
 extern crate tiles;
-extern crate gfx;
-extern crate gfx_device_gl;
 extern crate renderer;
 
 
@@ -21,7 +18,7 @@ use std::path::Path;
 
 // External Dependencies ------------------------------------------------------
 use tiles::{TileData, TileGrid, TileSet};
-use renderer::{Key, Keyboard, Button, Mouse, Renderable};
+use renderer::{Key, Keyboard, Button, Mouse, Renderable, Encoder};
 
 
 // Example --------------------------------------------------------------------
@@ -36,11 +33,7 @@ impl Renderable for Map {
 
     }
 
-    fn draw(&mut self, mut encoder: &mut gfx::Encoder<
-        gfx_device_gl::Resources,
-        gfx_device_gl::CommandBuffer
-
-    >, keyboard: &Keyboard, mouse: &Mouse) where Self: Sized {
+    fn draw(&mut self, mut encoder: &mut Encoder, keyboard: &Keyboard, mouse: &Mouse) where Self: Sized {
 
         // Scrolling
         if keyboard.is_pressed(Key::A) {

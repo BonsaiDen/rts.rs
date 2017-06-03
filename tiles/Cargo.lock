@@ -2,10 +2,6 @@
 name = "tiles"
 version = "0.1.0"
 dependencies = [
- "gfx 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "gfx_device_gl 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "image 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "lazy_static 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "renderer 0.1.0",
  "serde 1.0.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde-xml-rs 0.1.2 (git+https://github.com/RReverser/serde-xml-rs.git)",

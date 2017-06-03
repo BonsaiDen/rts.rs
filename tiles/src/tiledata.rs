@@ -35,7 +35,7 @@ impl TileData {
         Self {
             width: base.width.parse().unwrap_or(0),
             height: base.height.parse().unwrap_or(0),
-            indices: base.data.split(",").map(|i| i.trim().parse::<u32>().unwrap_or(1) - 1).collect()
+            indices: base.data.split(',').map(|i| i.trim().parse::<u32>().unwrap_or(1) - 1).collect()
         }
 
     }

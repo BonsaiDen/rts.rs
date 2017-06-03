@@ -10,20 +10,13 @@
 // Crates ---------------------------------------------------------------------
 extern crate renderer;
 
-extern crate serde;
-extern crate serde_xml_rs;
-#[macro_use]
-extern crate serde_derive;
-
 
 // Internal Dependencies ------------------------------------------------------
-mod terrain;
-mod tiledata;
-mod tilegrid;
-mod tileset;
+mod animation;
+mod sheet;
+mod view;
 
-pub use self::terrain::Terrain;
-pub use self::tiledata::TileData;
-pub use self::tilegrid::TileGrid;
-pub use self::tileset::TileSet;
+pub use self::animation::Animation;
+pub use self::sheet::SpriteSheet;
+pub use self::view::{Sprite, SpriteView};
 
