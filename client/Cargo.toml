@@ -1,0 +1,11 @@
+[package]
+name = "client"
+version = "0.1.0"
+authors = ["Ivo Wetzel <ivo.wetzel@googlemail.com>"]
+
+[dependencies]
+clockwork = { path="../clockwork", version="0.1.0" }
+serde_derive = "*"
+serde = "*"
+clap = "*"
+

@@ -1,0 +1,16 @@
+[package]
+name = "tiles"
+version = "0.1.0"
+authors = ["Ivo Wetzel <ivo.wetzel@googlemail.com>"]
+
+[dependencies]
+gfx = "*"
+gfx_device_gl = "*"
+image = "*"
+serde = "1.0.0"
+serde-xml-rs = { git = "https://github.com/RReverser/serde-xml-rs.git" }
+serde_derive = "1.0.0"
+lazy_static = "*"
+
+renderer = { path = "../renderer", version = "0.1.0" }
+
