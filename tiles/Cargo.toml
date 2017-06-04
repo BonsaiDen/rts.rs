@@ -12,4 +12,6 @@ rand = "*"
 
 [dev-dependencies]
 audio = { path = "../audio", version = "0.1.0" }
+sprites = { path = "../sprites", version = "0.1.0" }
+pathfinding = "*"
 

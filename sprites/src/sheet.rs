@@ -46,18 +46,17 @@ impl SpriteSheet {
         &self.texture
     }
 
-    // TODO allow for 2x 3x etc. sprites by adjust the uvs
-    pub fn uvs(&self, index: u32) -> [[f32; 2]; 4] {
+    pub fn uvs(&self, index: u32, size: (f32, f32)) -> [[f32; 2]; 4] {
         let (w, h) = (1.0 / self.cols as f32, 1.0 / self.rows as f32);
         let (x, y) = (
             (index % self.cols) as f32 * w,
             (index / self.cols) as f32 * h
         );
         [
-            [x, y + h],
-            [x + w, y + h],
+            [x, y + h * size.1],
+            [x + w * size.0, y + h * size.1],
             [x, y],
-            [x + w, y]
+            [x + w * size.0, y]
         ]
     }
 

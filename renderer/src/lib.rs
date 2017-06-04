@@ -143,7 +143,6 @@ pub fn run<
                     keyboard.reset();
                     mouse.reset();
                     mouse_pos = (-1, -1);
-                    mouse.set_position(mouse_pos);
                 },
                 InputEvent::WindowEvent{ event: WindowEvent::MouseMoved(x, y), .. } => {
                     mouse_pos = (x, y);

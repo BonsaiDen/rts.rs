@@ -8,6 +8,7 @@
 
 
 // STD Dependencies -----------------------------------------------------------
+use std::iter;
 use std::fs::File;
 use std::path::Path;
 use std::error::Error;
@@ -24,13 +25,23 @@ use renderer::Texture;
 use ::terrain::Terrain;
 
 
+// Tiletypes ------------------------------------------------------------------
+#[derive(Debug, Copy, Clone)]
+pub enum TileType {
+    Ground,
+    Water,
+    Other
+}
+
+
 // Tileset Abstraction --------------------------------------------------------
 #[derive(Debug)]
 pub struct TileSet {
     cols: u32,
     rows: u32,
     texture: Texture,
-    terrains: HashMap<String, Terrain>
+    terrains: HashMap<String, Terrain>,
+    tile_types: Vec<TileType>
 }
 
 impl TileSet {
@@ -47,26 +58,47 @@ impl TileSet {
         let texture = Texture::new(factory, tex_path.as_path())?;
         let size = texture.size();
 
+        let (cols, rows) = (
+            set.tilewidth.parse::<u32>()?,
+            set.tileheight.parse::<u32>()?
+        );
+
+        let mut types: Vec<TileType> = iter::repeat(TileType::Other).take((cols * rows) as usize).collect();
+
         // Extract terrains from tiles
         let mut tiles: Vec<(u32, u32, u32)> = set.tile.into_iter().filter_map(|t| {
             if let Ok(tile_index) = t.id.parse::<u32>() {
 
-                // Parse edge data
-                let edges: Vec<Option<u32>> = t.terrain.split(',').map(|e| {
-                    e.parse::<u32>().ok()
+                if let Some(typ) = t.typ {
+                    types[tile_index as usize] = match typ.as_str() {
+                        "ground" => TileType::Ground,
+                        "water" => TileType::Water,
+                        _ => TileType::Other
+                    };
+                }
 
-                }).collect();
+                if let Some(terrain) = t.terrain {
 
-                // Extract terrain index from edges
-                if let Some(terrain_index) = edges.clone().into_iter().filter_map(|e| e).min() {
+                    // Parse edge data
+                    let edges: Vec<Option<u32>> = terrain.split(',').map(|e| {
+                        e.parse::<u32>().ok()
 
-                    // Construct tile index from edge data
-                    let terrain_offset = edges.into_iter().enumerate().map(|(index, edge)| {
-                        edge.map(|_| 1 << index).unwrap_or(0) as u32
+                    }).collect();
 
-                    }).sum();
+                    // Extract terrain index from edges
+                    if let Some(terrain_index) = edges.clone().into_iter().filter_map(|e| e).min() {
 
-                    Some((terrain_index, terrain_offset, tile_index))
+                        // Construct tile index from edge data
+                        let terrain_offset = edges.into_iter().enumerate().map(|(index, edge)| {
+                            edge.map(|_| 1 << index).unwrap_or(0) as u32
+
+                        }).sum();
+
+                        Some((terrain_index, terrain_offset, tile_index))
+
+                    } else {
+                        None
+                    }
 
                 } else {
                     None
@@ -132,12 +164,22 @@ impl TileSet {
         }
 
         Ok(Self {
-            cols: size.0 / set.tilewidth.parse::<u32>()?,
-            rows: size.1 / set.tileheight.parse::<u32>()?,
+            cols: size.0 / cols,
+            rows: size.1 / rows,
             texture: texture,
-            terrains: terrains
+            terrains: terrains,
+            tile_types: types
         })
 
+    }
+
+    pub fn typ(&self, tile: u32) -> TileType {
+        if tile < self.tile_types.len() as u32 {
+            self.tile_types[tile as usize]
+
+        } else {
+            TileType::Other
+        }
     }
 
     pub fn terrain(&self, name: &str) -> Option<&Terrain> {
@@ -189,7 +231,10 @@ struct Set {
     image: Image,
     tilewidth: String,
     tileheight: String,
+    #[serde(default)]
     terraintypes: TerrainTypes,
+
+    #[serde(default)]
     tile: Vec<Tile>
 }
 
@@ -198,7 +243,7 @@ struct Image {
     source: String
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 struct TerrainTypes {
     terrain: Vec<TerrainType>
 }
@@ -224,6 +269,8 @@ struct TerrainProperty {
 #[derive(Debug, Deserialize)]
 struct Tile {
     id: String,
-    terrain: String
+    #[serde(rename(deserialize="type"))]
+    typ: Option<String>,
+    terrain: Option<String>
 }
 

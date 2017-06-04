@@ -22,38 +22,71 @@ use sprites::{SpriteSheet, SpriteView, Sprite};
 use renderer::{Key, Keyboard, Button, Mouse, Renderable, Encoder};
 
 
+// Structs --------------------------------------------------------------------
+pub struct Unit {
+    sprite: Sprite,
+    selected: bool
+}
+
+impl Unit {
+
+    pub fn new(x: f32, y: f32) -> Self {
+
+        let mut sprite = Sprite::new();
+        sprite.set_tile_size(2, 2);
+        sprite.set_size(64.0, 64.0);
+        sprite.set_position(x, y);
+        sprite.set_tile(8);
+
+        Self {
+            sprite: sprite,
+            selected: false
+        }
+
+    }
+
+    pub fn set_selected(&mut self, active: bool) {
+        self.selected = active;
+    }
+
+    pub fn is_hit(&self, x: f32, y: f32) -> bool {
+        self.sprite.hit(x, y)
+    }
+
+    pub fn draw(&self, view: &mut SpriteView) {
+        if self.selected {
+            let (x, y) = self.sprite.position();
+            let mut selection = Sprite::new();
+            selection.set_size(68.0, 68.0);
+            selection.set_position(x - 2.0, y - 2.0);
+            view.draw_sprite(&selection);
+        }
+        view.draw_sprite(&self.sprite);
+    }
+
+}
+
+
 // Example --------------------------------------------------------------------
 struct Demo {
     view: SpriteView,
-    sprites: Vec<Sprite>,
+    units: Vec<Unit>,
+    cursor: Sprite,
     scroll: (i32, i32)
 }
 
 impl Demo {
 
-    fn new(view: SpriteView) -> Self {
+    fn new(mut view: SpriteView) -> Self {
+
+        let mut cursor = Sprite::new();
+        cursor.set_size(32.0, 32.0);
+
         Self {
             view: view,
-            sprites: Vec::new(),
+            units: Vec::new(),
+            cursor: cursor,
             scroll: (0, 0)
-        }
-    }
-
-    fn create_sprite(&mut self, x: i32, y: i32) {
-        let mut sprite = self.view.create_sprite().unwrap();
-        sprite.set_size(32.0, 32.0);
-        sprite.set_position(x as f32, y as f32);
-
-        let tile: u8 = rand::random();
-        sprite.set_tile(tile as u32);
-
-        self.view.update_sprite(&sprite);
-        self.sprites.push(sprite)
-    }
-
-    fn destroy_sprite(&mut self) {
-        if let Some(sprite) = self.sprites.pop() {
-            self.view.destroy_sprite(sprite);
         }
     }
 
@@ -85,14 +118,51 @@ impl Renderable for Demo {
         }
 
         if mouse.was_pressed(Button::Left) {
+
             let (x, y) = mouse.get(Button::Left).position();
-            let (x, y) = (x + self.scroll.0, y + self.scroll.1 as i32);
-            self.create_sprite(x, y);
+            let (x, y) = ((x + self.scroll.0) as f32, (y + self.scroll.1) as f32);
+
+            let mut any = false;
+            for unit in &mut self.units {
+                unit.set_selected(false);
+                if unit.is_hit(x, y) && !any {
+                    unit.set_selected(true);
+                    any = true;
+                }
+            }
+
+            if !any {
+                self.units.push(Unit::new(x as f32, y as f32));
+            }
+
         }
 
         if mouse.was_pressed(Button::Right) {
-            self.destroy_sprite();
+
+            let (x, y) = mouse.get(Button::Right).position();
+            let (x, y) = ((x + self.scroll.0) as f32, (y + self.scroll.1) as f32);
+
+            let mut any = false;
+            self.units.retain(|unit| {
+                if unit.is_hit(x, y) && !any {
+                    any = true;
+                    false
+
+                } else {
+                    true
+                }
+            });
+
         }
+
+        let (px, py) = mouse.position();
+        self.cursor.set_position((px + self.scroll.0) as f32, (py + self.scroll.1) as f32);
+
+        for unit in &self.units {
+            unit.draw(&mut self.view);
+        }
+
+        self.view.draw_sprite(&self.cursor);
 
         self.view.scroll_to(self.scroll.0, self.scroll.1);
         self.view.draw(&mut encoder);
@@ -119,5 +189,4 @@ fn main() {
 
     });
 }
-
 

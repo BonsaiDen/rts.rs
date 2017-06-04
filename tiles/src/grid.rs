@@ -16,16 +16,17 @@ use renderer::{ColorBuffer, Encoder, Factory, QuadView, Vertex};
 
 
 // Internal Dependencies ------------------------------------------------------
+use ::data::TileData;
 use ::terrain::Terrain;
 use ::tileset::TileSet;
-use ::tiledata::TileData;
+use ::source::TileSource;
 
 
 // Tilegrid Abstraction -------------------------------------------------------
 #[derive(Debug)]
-pub struct TileGrid {
+pub struct TileGrid<S> {
     tileset: TileSet,
-    tiledata: TileData,
+    source: S,
     quad_view: QuadView,
     draw_size: u32,
     dirty: bool,
@@ -42,7 +43,7 @@ pub struct TileGrid {
     cols: u32
 }
 
-impl TileGrid {
+impl<S> TileGrid<S> where S: TileSource {
 
     pub fn new(
         factory: &mut Factory,
@@ -105,7 +106,7 @@ impl TileGrid {
 
         Self {
             tileset: tileset,
-            tiledata: TileData::default(),
+            source: S::default(),
             quad_view: quad_view,
             draw_size: draw_size,
             dirty: true,
@@ -124,38 +125,18 @@ impl TileGrid {
 
     }
 
-    pub fn consume_tile(&mut self, x: i32, y: i32) -> Option<&Terrain> {
-        if let Some(index) = self.tiledata.get_tile_index(x, y) {
-            if let Some(terrain) = self.tileset.get_tile_terrain(index) {
-                if terrain.consume_tile(&mut self.tiledata, x, y) {
-                    self.dirty = true;
-                    Some(terrain)
-
-                } else {
-                    None
-                }
-
-            } else {
-                None
-            }
-
-        } else {
-            None
-        }
-    }
-
     pub fn set_tile_index(&mut self, x: i32, y: i32, index: u32) {
-        if self.tiledata.set_tile_index(x, y, index) {
+        if self.source.set_tile_index(x, y, index) {
             self.dirty = true;
         }
     }
 
     pub fn get_tile_index(&self, x: i32, y: i32) -> Option<u32> {
-        self.tiledata.get_tile_index(x, y)
+        self.source.get_tile_index(x, y)
     }
 
     pub fn get_tile_terrain(&self, x: i32, y: i32) -> Option<&Terrain> {
-        if let Some(index) = self.tiledata.get_tile_index(x, y) {
+        if let Some(index) = self.source.get_tile_index(x, y) {
             self.tileset.get_tile_terrain(index)
 
         } else {
@@ -177,8 +158,20 @@ impl TileGrid {
         x >= ox && x < ox + self.width as i32 + border * 2 && y >= oy && y < oy + self.height as i32 + border * 2
     }
 
-    pub fn set_tiledata(&mut self, data: TileData) {
-        self.tiledata = data;
+    pub fn tileset(&self) -> &TileSet {
+        &self.tileset
+    }
+
+    pub fn source(&self) -> &S {
+        &self.source
+    }
+
+    pub fn source_mut(&mut self) -> &mut S {
+        &mut self.source
+    }
+
+    pub fn set_source(&mut self, source: S) {
+        self.source = source;
         self.dirty = true;
     }
 
@@ -218,7 +211,7 @@ impl TileGrid {
             self.quad_view.set_dirty();
         }
 
-        self.quad_view.draw(encoder);
+        self.quad_view.draw(encoder, None);
 
     }
 
@@ -227,15 +220,15 @@ impl TileGrid {
         let ox = (self.gx * self.border) as isize - self.border as isize;
         let oy = (self.gy * self.border) as isize - self.border as isize;
 
-        let w = self.tiledata.width as isize;
-        let m = w * self.tiledata.height as isize;
+        let w = self.source.width() as isize;
+        let m = w * self.source.height() as isize;
 
         for y in 0..self.rows as isize {
             for x in 0..self.cols as isize {
 
                 let offset = (oy + y) * w + (ox + x as isize);
                 if offset >= 0 && offset < m {
-                    let i = self.tiledata.indices[offset as usize];
+                    let i = self.source.index(offset as usize);
                     self.set_tile(x as u32, y as u32, i);
                 }
 
@@ -257,9 +250,37 @@ impl TileGrid {
 
     fn limit(&self, x: i32, y: i32) -> (u32, u32) {
         (
-            cmp::min(cmp::max(x, 0) as u32, (cmp::max(self.tiledata.width, self.width) - self.width) * self.draw_size),
-            cmp::min(cmp::max(y, 0) as u32, (cmp::max(self.tiledata.height, self.height) - self.height) * self.draw_size)
+            cmp::min(cmp::max(x, 0) as u32, (cmp::max(self.source.width(), self.width) - self.width) * self.draw_size),
+            cmp::min(cmp::max(y, 0) as u32, (cmp::max(self.source.height(), self.height) - self.height) * self.draw_size)
         )
+    }
+
+}
+
+
+// Terrain Specific Grid Implementation ---------------------------------------
+pub type TerrainGrid = TileGrid<TileData>;
+
+impl TerrainGrid {
+
+    pub fn consume_tile(&mut self, x: i32, y: i32) -> Option<&Terrain> {
+        if let Some(index) = self.source.get_tile_index(x, y) {
+            if let Some(terrain) = self.tileset.get_tile_terrain(index) {
+                if terrain.consume_tile(&mut self.source, x, y) {
+                    self.dirty = true;
+                    Some(terrain)
+
+                } else {
+                    None
+                }
+
+            } else {
+                None
+            }
+
+        } else {
+            None
+        }
     }
 
 }

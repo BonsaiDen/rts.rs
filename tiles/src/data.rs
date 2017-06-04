@@ -16,6 +16,10 @@ use std::path::Path;
 use serde_xml_rs::deserialize;
 
 
+// Internal Dependencies ------------------------------------------------------
+use ::source::TileSource;
+
+
 // Tiledata Abstraction -------------------------------------------------------
 #[derive(Debug)]
 pub struct TileData {
@@ -38,28 +42,6 @@ impl TileData {
             indices: base.data.split(',').map(|i| i.trim().parse::<u32>().unwrap_or(1) - 1).collect()
         }
 
-    }
-
-    pub fn set_tile_index(&mut self, x: i32, y: i32, index: u32) -> bool {
-        let i = y * self.width as i32 + x;
-        if i >= 0 && i < (self.width * self.height) as i32 {
-            self.indices[i as usize] = index;
-            true
-
-        } else {
-            false
-        }
-    }
-
-    pub fn get_tile_index(&self, x: i32, y: i32) -> Option<u32> {
-        let w = self.width as i32;
-        let h = self.height as i32;
-        if x >= 0 && x < w && y >= 0 && y < h {
-            Some(self.indices[(y * w + x) as usize])
-
-        } else {
-            None
-        }
     }
 
     pub fn get_offset_border(&self, x: i32, y: i32, distance: i32) -> Vec<Option<(i32, i32)>> {
@@ -105,6 +87,48 @@ impl TileData {
         let h = self.height as i32;
         if x >= 0 && x < w && y >= 0 && y < h {
             Some((x, y))
+
+        } else {
+            None
+        }
+    }
+
+}
+
+impl TileSource for TileData {
+
+    fn width(&self) -> u32 {
+        self.width
+    }
+
+    fn height(&self) -> u32 {
+        self.height
+    }
+
+    fn index(&self, index: usize) -> u32 {
+        self.indices[index]
+    }
+
+    fn indices(&self) -> &[u32] {
+        &self.indices
+    }
+
+    fn set_tile_index(&mut self, x: i32, y: i32, index: u32) -> bool {
+        let i = y * self.width as i32 + x;
+        if i >= 0 && i < (self.width * self.height) as i32 {
+            self.indices[i as usize] = index;
+            true
+
+        } else {
+            false
+        }
+    }
+
+    fn get_tile_index(&self, x: i32, y: i32) -> Option<u32> {
+        let w = self.width as i32;
+        let h = self.height as i32;
+        if x >= 0 && x < w && y >= 0 && y < h {
+            Some(self.indices[(y * w + x) as usize])
 
         } else {
             None

@@ -8,7 +8,8 @@
 
 
 // Internal Dependencies ------------------------------------------------------
-use ::tiledata::TileData;
+use ::data::TileData;
+use ::source::TileSource;
 
 
 // Terrain Abstraction --------------------------------------------------------

@@ -17,13 +17,15 @@ extern crate serde_derive;
 
 
 // Internal Dependencies ------------------------------------------------------
+mod data;
+mod grid;
+mod source;
 mod terrain;
-mod tiledata;
-mod tilegrid;
 mod tileset;
 
+pub use self::data::TileData;
+pub use self::grid::{TileGrid, TerrainGrid};
 pub use self::terrain::Terrain;
-pub use self::tiledata::TileData;
-pub use self::tilegrid::TileGrid;
-pub use self::tileset::TileSet;
+pub use self::tileset::{TileSet, TileType};
+pub use self::source::TileSource;
 

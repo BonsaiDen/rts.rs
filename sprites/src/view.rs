@@ -7,10 +7,6 @@
 // except according to those terms.
 
 
-// STD Dependencies -----------------------------------------------------------
-use std::iter;
-
-
 // External Dependencies ------------------------------------------------------
 use renderer::{ColorBuffer, Encoder, Factory, QuadView, Vertex};
 
@@ -23,16 +19,32 @@ use ::sheet::SpriteSheet;
 // Sprite Abstraction ---------------------------------------------------------
 #[derive(Debug)]
 pub struct Sprite {
-    id: usize,
-    bucket: usize,
-
     position: (f32, f32),
     size: (f32, f32),
     tile: u32,
+    tile_size: (f32, f32),
     animation: Option<Animation>
 }
 
 impl Sprite {
+
+    pub fn new() -> Self {
+        Self {
+            position: (0.0, 0.0),
+            size: (0.0, 0.0),
+            tile: 0,
+            tile_size: (1.0, 1.0),
+            animation: None
+        }
+    }
+
+    pub fn size(&self) -> (f32, f32) {
+        self.size
+    }
+
+    pub fn position(&self) -> (f32, f32) {
+        self.position
+    }
 
     pub fn set_size(&mut self, w: f32, h: f32) {
         self.size.0 = w;
@@ -48,6 +60,17 @@ impl Sprite {
         self.tile = index;
     }
 
+    pub fn set_tile_size(&mut self, x: u8, y: u8) {
+        self.tile_size = (x as f32, y as f32);
+    }
+
+    pub fn hit(&self, x: f32, y: f32) -> bool {
+        x >= self.position.0
+        && y >= self.position.1
+        && x < self.position.0 + self.size.0
+        && y < self.position.1 + self.size.1
+    }
+
 }
 
 
@@ -55,10 +78,8 @@ impl Sprite {
 #[derive(Debug)]
 pub struct SpriteView {
     sheet: SpriteSheet,
-    sprite_buckets: Vec<Option<usize>>,
+    sprite_draw_index: usize,
     sprite_max: usize,
-    sprite_count: usize,
-    sprite_id: usize,
     quad_view: QuadView,
     view_width: f32,
     view_height: f32,
@@ -80,7 +101,7 @@ impl SpriteView {
         let mut vertices = Vec::with_capacity(max_sprites);
         for _ in 0..max_sprites {
 
-            let uvs = sheet.uvs(0);
+            let uvs = sheet.uvs(0, (1.0, 1.0));
 
             // Top left
             vertices.push(Vertex { pos: [-100000.0, -100000.0], uv: uvs[0] });
@@ -113,10 +134,8 @@ impl SpriteView {
 
         Self {
             sheet: sheet,
-            sprite_buckets: iter::repeat(None).take(max_sprites).collect(),
+            sprite_draw_index: 0,
             sprite_max: max_sprites,
-            sprite_count: 0,
-            sprite_id: 0,
             quad_view: quad_view,
             view_width: view_width as f32,
             view_height: view_height as f32,
@@ -124,40 +143,30 @@ impl SpriteView {
         }
     }
 
-    pub fn create_sprite(&mut self) -> Option<Sprite> {
-        if self.sprite_count < self.sprite_max {
-
-            self.sprite_count += 1;
-            self.sprite_id += 1;
-
-            let mut index = 0;
-            for (i, bucket) in self.sprite_buckets.iter_mut().enumerate() {
-                if bucket.is_none() {
-                    *bucket = Some(self.sprite_id);
-                    index = i;
-                    break;
-                }
-            }
-
-            Some(Sprite {
-                id: self.sprite_id,
-                bucket: index,
-
-                position: (0.0, 0.0),
-                size: (0.0, 0.0),
-                tile: 0,
-                animation: None
-            })
-
-        } else {
-            None
-        }
+    pub fn scroll_to(&mut self, scroll_x: i32, scroll_y: i32) {
+        self.quad_view.scroll_to(-scroll_x as f32, scroll_y as f32);
     }
 
-    pub fn update_sprite(&mut self, sprite: &Sprite) {
+    pub fn draw(&mut self, encoder: &mut Encoder) {
 
-        let vertices = self.quad_view.vertices_mut((self.sprite_max - 1) * 6 - sprite.bucket * 6);
-        let uvs = self.sheet.uvs(sprite.tile);
+        if self.dirty {
+            self.dirty = false;
+            self.quad_view.set_dirty();
+        }
+
+        self.quad_view.draw(encoder, Some(self.sprite_draw_index as u32 * 6));
+        self.sprite_draw_index = 0;
+
+    }
+
+    pub fn draw_sprite(&mut self, sprite: &Sprite) {
+
+        if self.sprite_draw_index == self.sprite_max {
+            return;
+        }
+
+        let vertices = self.quad_view.vertices_mut(self.sprite_draw_index * 6);
+        let uvs = self.sheet.uvs(sprite.tile, sprite.tile_size);
         let (w, h) = sprite.size;
         let (x, y) = (
             (sprite.position.0 - self.view_width / 2.0),
@@ -188,30 +197,8 @@ impl SpriteView {
         vertices[5].pos = [x, y + h];
         vertices[5].uv = uvs[2];
 
+        self.sprite_draw_index += 1;
         self.dirty = true;
-
-    }
-
-    pub fn destroy_sprite(&mut self, mut sprite: Sprite) {
-        sprite.position.0 = -100000.0;
-        sprite.position.1 = -100000.0;
-        self.update_sprite(&sprite);
-        self.sprite_buckets[sprite.bucket] = None;
-        self.sprite_count -= 1;
-    }
-
-    pub fn scroll_to(&mut self, scroll_x: i32, scroll_y: i32) {
-        self.quad_view.scroll_to(-scroll_x as f32, scroll_y as f32);
-    }
-
-    pub fn draw(&mut self, encoder: &mut Encoder) {
-
-        if self.dirty {
-            self.dirty = false;
-            self.quad_view.set_dirty();
-        }
-
-        self.quad_view.draw(encoder);
 
     }
 

@@ -21,36 +21,51 @@
   </terrain>
   <terrain name="Hills" tile="125"/>
  </terraintypes>
+ <tile id="0" type="ground"/>
+ <tile id="1" type="ground"/>
+ <tile id="2" type="ground"/>
+ <tile id="3" type="ground"/>
+ <tile id="4" type="ground"/>
  <tile id="5" terrain=",,,0"/>
  <tile id="6" terrain=",,0,0"/>
  <tile id="7" terrain=",,0,"/>
  <tile id="8" terrain="0,0,0,"/>
  <tile id="9" terrain="0,0,,0"/>
- <tile id="11" terrain="1,1,1,"/>
- <tile id="12" terrain="1,1,,"/>
- <tile id="13" terrain="1,1,,1"/>
- <tile id="14" terrain=",,,1"/>
- <tile id="15" terrain=",,1,1"/>
- <tile id="16" terrain=",,1,"/>
+ <tile id="10" type="water"/>
+ <tile id="11" type="water" terrain="1,1,1,"/>
+ <tile id="12" type="water" terrain="1,1,,"/>
+ <tile id="13" type="water" terrain="1,1,,1"/>
+ <tile id="14" type="water" terrain=",,,1"/>
+ <tile id="15" type="water" terrain=",,1,1"/>
+ <tile id="16" type="water" terrain=",,1,"/>
+ <tile id="17" type="ground"/>
+ <tile id="18" type="ground"/>
+ <tile id="19" type="ground"/>
+ <tile id="20" type="ground"/>
+ <tile id="21" type="ground"/>
  <tile id="22" terrain=",0,,0"/>
  <tile id="23" terrain="0,0,0,0"/>
  <tile id="24" terrain="0,,0,"/>
  <tile id="25" terrain="0,,0,0"/>
  <tile id="26" terrain=",0,0,0"/>
- <tile id="28" terrain="1,,1,"/>
- <tile id="30" terrain=",1,,1"/>
- <tile id="31" terrain=",1,,1"/>
- <tile id="32" terrain="1,1,1,1"/>
- <tile id="33" terrain="1,,1,"/>
+ <tile id="27" type="water"/>
+ <tile id="28" type="water" terrain="1,,1,"/>
+ <tile id="30" type="water" terrain=",1,,1"/>
+ <tile id="31" type="water" terrain=",1,,1"/>
+ <tile id="32" type="water" terrain="1,1,1,1"/>
+ <tile id="33" type="water" terrain="1,,1,"/>
+ <tile id="34" type="ground"/>
  <tile id="39" terrain=",0,,"/>
  <tile id="40" terrain="0,0,,"/>
  <tile id="41" terrain="0,,,"/>
- <tile id="45" terrain="1,,1,1"/>
- <tile id="46" terrain=",,1,1"/>
- <tile id="47" terrain=",1,1,1"/>
- <tile id="48" terrain=",1,,"/>
- <tile id="49" terrain="1,1,,"/>
- <tile id="50" terrain="1,,,"/>
+ <tile id="44" type="water"/>
+ <tile id="45" type="water" terrain="1,,1,1"/>
+ <tile id="46" type="water" terrain=",,1,1"/>
+ <tile id="47" type="water" terrain=",1,1,1"/>
+ <tile id="48" type="water" terrain=",1,,"/>
+ <tile id="49" type="water" terrain="1,1,,"/>
+ <tile id="50" type="water" terrain="1,,,"/>
+ <tile id="51" type="ground"/>
  <tile id="62" terrain="2,2,2,"/>
  <tile id="63" terrain="2,2,,"/>
  <tile id="64" terrain="2,2,,2"/>
@@ -60,7 +75,7 @@
  <tile id="79" terrain="2,,2,"/>
  <tile id="81" terrain=",2,,2"/>
  <tile id="82" terrain=",2,,2"/>
- <tile id="83" terrain="2,2,2,2"/>
+ <tile id="83" type="ground" terrain="2,2,2,2"/>
  <tile id="84" terrain="2,,2,"/>
  <tile id="96" terrain="2,,2,2"/>
  <tile id="97" terrain=",,2,2"/>

@@ -76,6 +76,8 @@ impl QuadView {
             data: grid::Data {
                 vbuf: vertex_buffer,
                 transform: locals_buffer,
+                blend_target: color.clone(),
+                blend_ref: [1.0; 4],
                 tex: (texture, sampler),
                 out: color
             },
@@ -108,7 +110,7 @@ impl QuadView {
         &mut self.vertices[index..index + 6]
     }
 
-    pub fn draw(&mut self, encoder: &mut gfx::Encoder<gfx_device_gl::Resources, gfx_device_gl::CommandBuffer>) {
+    pub fn draw(&mut self, encoder: &mut gfx::Encoder<gfx_device_gl::Resources, gfx_device_gl::CommandBuffer>, vertices_limit: Option<u32>) {
 
         if self.dirty {
             self.dirty = false;
@@ -116,6 +118,11 @@ impl QuadView {
         }
 
         encoder.update_buffer(&self.data.transform, &[self.transform], 0).ok();
+
+        if let Some(limit) = vertices_limit {
+            self.slice.end = limit;
+        }
+
         encoder.draw(&self.slice, &self.pso, &self.data);
 
     }
@@ -150,8 +157,10 @@ impl QuadView {
             grid::Init {
                 vbuf: (),
                 transform: "Transform",
+                blend_target: ("o_Color", gfx::state::MASK_ALL, gfx::preset::blend::ALPHA),
                 tex: "t_Texture",
-                out: "o_Color"
+                out: "o_Color",
+                blend_ref: ()
             }
 
         ).expect("QuadView: Failed to create pipeline state object.")
@@ -175,6 +184,8 @@ gfx_defines!{
     pipeline grid {
         vbuf: gfx::VertexBuffer<Vertex> = (),
         transform: gfx::ConstantBuffer<Transform> = "Transform",
+        blend_target: gfx::BlendTarget<gfx::format::Srgba8> = ("o_Color", gfx::state::MASK_ALL, gfx::preset::blend::ALPHA),
+        blend_ref: gfx::BlendRef = (),
         tex: gfx::TextureSampler<[f32; 4]> = "t_Texture",
         out: gfx::RenderTarget<gfx::format::Srgba8> = "Target0",
     }

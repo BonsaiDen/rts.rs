@@ -46,6 +46,7 @@ impl AudioQueue {
             while let Ok(Some(command)) = receiver.recv() {
                 match command {
                     AudioCommand::EffectPlay(path, speed) => {
+                        println!("[Audio] Play {:?}", path);
                         let file = File::open(path).unwrap();
                         let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
                         rodio::play_raw(&endpoint, source.convert_samples().speed(speed));
@@ -74,5 +75,11 @@ impl AudioQueue {
         }
     }
 
+}
+
+impl Drop for AudioQueue {
+    fn drop(&mut self) {
+        self.stop()
+    }
 }
 
