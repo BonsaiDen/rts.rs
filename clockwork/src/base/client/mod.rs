@@ -97,12 +97,12 @@ pub struct ClockworkClient<S, O, I, R> {
 
 impl<S, O, I, R> ClockworkClient<S, O, I, R> where S: State<O, I, R>, O: Options, I: Input {
 
-    pub fn new(config: &Config, state: S) -> Result<Self, Error> {
+    pub fn new(config: &Config) -> Result<Self, Error> {
         Ok(Self {
             socket: {
                 Socket::new("0.0.0.0:0", config.packet_max_size)?
             },
-            state: state,
+            state: S::default(),
             local: ClientRemote::<S, O, I, R>::new(
                 ConnectionID::new(rand::random()),
                 config.remote_addr
@@ -288,8 +288,6 @@ impl<S, O, I, R> ClockworkClient<S, O, I, R> where S: State<O, I, R>, O: Options
                 ClientEvent::Ready(connections) => {
 
                     if let Some(connections) = connections {
-
-                        self.state = S::default();
 
                         if self.network_status == NetworkStatus::Connecting {
                             let connections = self.connections();

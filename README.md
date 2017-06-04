@@ -41,7 +41,6 @@ cargo run -- $PORT --addr $HOST_ADDRESS
 ### Game 
 
 - Build a sprite renderer
-- Include basic, cross platform audio playback
 - Initial unit abstraction
     - Selection
     - Command Queue

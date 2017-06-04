@@ -82,7 +82,7 @@ pub fn run<S, O, I, R, C: Fn(Config, u8, Clockwork<S, O, I, R>)> (
         .. Config::default()
     };
 
-    let mut client = Clockwork::<S, O, I, R>::connect(config, S::default())?;
+    let mut client = Clockwork::<S, O, I, R>::connect(config)?;
     if addr.is_none() {
         println!("[Client] [Network] Starting server on local port {}...", port);
         client = client.with_server()?;

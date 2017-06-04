@@ -98,11 +98,11 @@ impl<S, O, I, R> Clockwork<S, O, I, R> where S: State<O, I, R> + 'static,
                                              O: Options + 'static,
                                              I: Input + 'static {
 
-    pub fn connect(config: Config, state: S) -> Result<Self, Error> {
+    pub fn connect(config: Config) -> Result<Self, Error> {
         Ok(Self {
             config: config,
             client: {
-                ClockworkClient::new(&config, state)?
+                ClockworkClient::new(&config)?
             },
             server: None,
             events: VecDeque::new(),

@@ -8,6 +8,7 @@
 
 
 // Crates ---------------------------------------------------------------------
+extern crate rand;
 extern crate image;
 extern crate serde;
 extern crate clockwork;
@@ -17,9 +18,14 @@ extern crate serde_derive;
 extern crate gfx;
 extern crate gfx_device_gl;
 
+extern crate audio;
+extern crate tiles;
 extern crate client;
 extern crate renderer;
-extern crate tiles;
+
+
+// External Dependencies ------------------------------------------------------
+use rand::Rng;
 
 
 // Internal Dependencies ------------------------------------------------------
@@ -34,10 +40,19 @@ pub fn main() {
 
     client::start(|config, min_players, client| {
         renderer::run::<Game, _>("RTS", 640, 480, 60, config.high_tick_rate as u32, move |refs| {
+
+            // Create a seed for the RNG
+            let mut seed = [0u8; 4];
+            rand::thread_rng().fill_bytes(&mut seed[..]);
+            println!("Seed is: {:?}", seed);
+
             let options = GameOptions {
-                min_players: min_players
+                min_players: min_players,
+                random_seed: seed
             };
+
             Game::new(client, options, refs)
+
         });
 
     }).expect("[Game] Failed to start client.");

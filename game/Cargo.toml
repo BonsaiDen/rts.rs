@@ -8,11 +8,13 @@ clockwork = { path = "../clockwork", version="0.1.0" }
 client = { path = "../client", version="0.1.0" }
 renderer = { path = "../renderer", version="0.1.0" }
 tiles = { path = "../tiles", version="0.1.0" }
+audio = { path = "../audio", version = "0.1.0" }
 
 gfx = "*"
 gfx_device_gl = "*"
 
 serde_derive = "1.0.0"
 serde = "1.0.0"
+rand = "*"
 image = "*"
 

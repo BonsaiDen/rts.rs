@@ -14,7 +14,8 @@ use clockwork::Options;
 // Local Game Options ---------------------------------------------------------
 #[derive(Debug, Hash, Clone, Serialize, Deserialize)]
 pub struct GameOptions {
-    pub min_players: u8
+    pub min_players: u8,
+    pub random_seed: [u8; 4]
 }
 
 impl Options for GameOptions {}
@@ -22,7 +23,8 @@ impl Options for GameOptions {}
 impl Default for GameOptions {
     fn default() -> Self {
         Self {
-            min_players: 3
+            min_players: 3,
+            random_seed: [0, 0, 0, 0]
         }
     }
 }

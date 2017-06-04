@@ -171,6 +171,12 @@ impl TileGrid {
         )
     }
 
+    pub fn tile_within_screen_grid(&self, x: i32, y: i32, border: i32) -> bool {
+        let ox = (self.gx * self.border) as i32 - border;
+        let oy = (self.gy * self.border) as i32 - border;
+        x >= ox && x < ox + self.width as i32 + border * 2 && y >= oy && y < oy + self.height as i32 + border * 2
+    }
+
     pub fn set_tiledata(&mut self, data: TileData) {
         self.tiledata = data;
         self.dirty = true;
