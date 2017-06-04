@@ -42,7 +42,12 @@ cargo run -- $PORT --addr $HOST_ADDRESS
 
 - Build a sprite renderer
 - Include basic, cross platform audio playback
+- Initial unit abstraction
+    - Selection
+    - Command Queue
+
 - Start work on path finding
+- Concept for fog of war
 - Concept for encapuslating command inputs for network transmission
 - Concept for interpolating local positions between ticks and rendererd frames
 

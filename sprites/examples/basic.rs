@@ -8,6 +8,7 @@
 
 
 // Crates ---------------------------------------------------------------------
+extern crate rand;
 extern crate sprites;
 extern crate renderer;
 
@@ -24,31 +25,34 @@ use renderer::{Key, Keyboard, Button, Mouse, Renderable, Encoder};
 // Example --------------------------------------------------------------------
 struct Demo {
     view: SpriteView,
-    sprite: Option<Sprite>,
+    sprites: Vec<Sprite>,
     scroll: (i32, i32)
 }
 
 impl Demo {
-    fn new(mut view: SpriteView) -> Self {
+
+    fn new(view: SpriteView) -> Self {
         Self {
             view: view,
-            sprite: None,
+            sprites: Vec::new(),
             scroll: (0, 0)
         }
     }
 
-    fn create_sprite(&mut self) {
+    fn create_sprite(&mut self, x: i32, y: i32) {
         let mut sprite = self.view.create_sprite().unwrap();
         sprite.set_size(32.0, 32.0);
-        sprite.set_position(0.0, 0.0);
-        sprite.set_tile(22);
+        sprite.set_position(x as f32, y as f32);
+
+        let tile: u8 = rand::random();
+        sprite.set_tile(tile as u32);
 
         self.view.update_sprite(&sprite);
-        self.sprite = Some(sprite);
+        self.sprites.push(sprite)
     }
 
     fn destroy_sprite(&mut self) {
-        if let Some(sprite) = self.sprite.take() {
+        if let Some(sprite) = self.sprites.pop() {
             self.view.destroy_sprite(sprite);
         }
     }
@@ -81,17 +85,9 @@ impl Renderable for Demo {
         }
 
         if mouse.was_pressed(Button::Left) {
-
-            if self.sprite.is_none() {
-                self.create_sprite();
-            }
-
-            if let Some(ref mut sprite) = self.sprite {
-                let (x, y) = mouse.get(Button::Left).position();
-                sprite.set_position((x + self.scroll.0) as f32, (y + self.scroll.1) as f32);
-                self.view.update_sprite(&sprite);
-            }
-
+            let (x, y) = mouse.get(Button::Left).position();
+            let (x, y) = (x + self.scroll.0, y + self.scroll.1 as i32);
+            self.create_sprite(x, y);
         }
 
         if mouse.was_pressed(Button::Right) {

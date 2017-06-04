@@ -80,6 +80,8 @@ pub fn run<
     let builder = WindowBuilder::new()
         .with_title(title.to_string())
         .with_dimensions(width, height)
+        .with_min_dimensions(width, height)
+        .with_max_dimensions(width, height)
         .with_vsync();
 
     let events = EventsLoop::new();
@@ -117,9 +119,9 @@ pub fn run<
         callback(refs)
     };
 
-    let mut mouse_pos = (0, 0);
-    let mut keyboard = Keyboard::new(32);
-    let mut mouse = Mouse::new(2);
+    let mut mouse_pos = (-1, -1);
+    let mut keyboard = Keyboard::new(32, ());
+    let mut mouse = Mouse::new(2, mouse_pos);
 
     let mut last_tick = Instant::now();
     let mut running = true;
@@ -140,15 +142,22 @@ pub fn run<
                 InputEvent::WindowEvent{ event: WindowEvent::Focused(_), .. } => {
                     keyboard.reset();
                     mouse.reset();
+                    mouse_pos = (-1, -1);
+                    mouse.set_position(mouse_pos);
                 },
                 InputEvent::WindowEvent{ event: WindowEvent::MouseMoved(x, y), .. } => {
                     mouse_pos = (x, y);
+                    mouse.set_position(mouse_pos);
                 },
                 InputEvent::WindowEvent{ event: WindowEvent::MouseInput(ElementState::Pressed, button), .. } => {
-                    mouse.set(button.into(), ButtonState::WasPressed(mouse_pos.0, mouse_pos.1));
+                    if mouse_pos.0 != -1 || mouse_pos.1 != -1 {
+                        mouse.set(button.into(), ButtonState::WasPressed(mouse_pos.0, mouse_pos.1));
+                    }
                 },
                 InputEvent::WindowEvent{ event: WindowEvent::MouseInput(ElementState::Released, button), .. } => {
-                    mouse.set(button.into(), ButtonState::WasReleased(mouse_pos.0, mouse_pos.1));
+                    if mouse_pos.0 != -1 || mouse_pos.1 != -1 {
+                        mouse.set(button.into(), ButtonState::WasReleased(mouse_pos.0, mouse_pos.1));
+                    }
                 },
                 InputEvent::WindowEvent{ event: WindowEvent::KeyboardInput(ElementState::Pressed, _, Some(key), _), .. } => {
                     keyboard.set(key.into(), KeyState::WasPressed);

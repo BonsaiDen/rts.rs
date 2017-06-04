@@ -156,7 +156,7 @@ impl SpriteView {
 
     pub fn update_sprite(&mut self, sprite: &Sprite) {
 
-        let vertices = self.quad_view.vertices_mut(sprite.bucket);
+        let vertices = self.quad_view.vertices_mut((self.sprite_max - 1) * 6 - sprite.bucket * 6);
         let uvs = self.sheet.uvs(sprite.tile);
         let (w, h) = sprite.size;
         let (x, y) = (

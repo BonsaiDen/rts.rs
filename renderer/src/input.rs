@@ -136,7 +136,8 @@ pub enum ButtonState {
     WasPressed(i32, i32),
     Pressed(i32, i32),
     WasReleased(i32, i32),
-    Released(i32, i32)
+    Released(i32, i32),
+    Position(i32, i32)
 }
 
 impl ButtonState {
@@ -146,7 +147,8 @@ impl ButtonState {
             ButtonState::WasPressed(x, y)
             | ButtonState::Pressed(x, y)
             | ButtonState::WasReleased(x, y)
-            | ButtonState::Released(x, y) => (x, y)
+            | ButtonState::Released(x, y)
+            | ButtonState::Position(x, y) => (x, y)
         }
     }
 
@@ -215,17 +217,19 @@ impl Default for ButtonState {
 
 
 // Input ----------------------------------------------------------------------
-pub struct InputState<I, T> {
+pub struct InputState<I, T, C> {
     index: PhantomData<I>,
-    fields: Vec<T>
+    fields: Vec<T>,
+    custom: C
 }
 
-impl<I, T> InputState<I, T> where T: Default + Clone + AdvanceableState, I: Into<usize> {
+impl<I, T, C> InputState<I, T, C> where T: Default + Clone + AdvanceableState, I: Into<usize> {
 
-    pub fn new(size: usize) -> Self {
+    pub fn new(size: usize, custom: C) -> Self {
         Self {
             fields: iter::repeat(T::default()).take(size).collect(),
-            index: PhantomData
+            index: PhantomData,
+            custom: custom
         }
     }
 
@@ -267,6 +271,18 @@ impl<I, T> InputState<I, T> where T: Default + Clone + AdvanceableState, I: Into
 
 }
 
-pub type Keyboard = InputState<Key, KeyState>;
-pub type Mouse = InputState<Button, ButtonState>;
+pub type Keyboard = InputState<Key, KeyState, ()>;
+pub type Mouse = InputState<Button, ButtonState, (i32, i32)>;
+
+impl Mouse {
+
+    pub fn set_position(&mut self, position: (i32, i32)) {
+        self.custom = position;
+    }
+
+    pub fn position(&self) -> (i32, i32) {
+        self.custom
+    }
+
+}
 

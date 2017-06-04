@@ -6,3 +6,6 @@ authors = ["Ivo Wetzel <ivo.wetzel@googlemail.com>"]
 [dependencies]
 renderer = { path = "../renderer", version = "0.1.0" }
 
+[dev-dependencies]
+rand = "*"
+

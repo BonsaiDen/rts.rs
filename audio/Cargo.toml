@@ -1,0 +1,8 @@
+[package]
+name = "audio"
+version = "0.1.0"
+authors = ["Ivo Wetzel <ivo.wetzel@googlemail.com>"]
+
+[dependencies]
+rodio = "*"
+

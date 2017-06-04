@@ -8,15 +8,19 @@
 
 
 // Crates ---------------------------------------------------------------------
+extern crate rand;
+extern crate audio;
 extern crate tiles;
 extern crate renderer;
 
 
 // STD Dependencies -----------------------------------------------------------
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 
 // External Dependencies ------------------------------------------------------
+use rand::Rng;
+use audio::AudioQueue;
 use tiles::{TileData, TileGrid, TileSet};
 use renderer::{Key, Keyboard, Button, Mouse, Renderable, Encoder};
 
@@ -24,6 +28,7 @@ use renderer::{Key, Keyboard, Button, Mouse, Renderable, Encoder};
 // Example --------------------------------------------------------------------
 struct Map {
     tile_grid: TileGrid,
+    audio: AudioQueue,
     scroll: (i32, i32)
 }
 
@@ -59,12 +64,18 @@ impl Renderable for Map {
             let (x, y) = mouse.get(Button::Left).position();
             let p = self.tile_grid.screen_to_grid(x, y);
 
-            println!("{:?}", self.tile_grid.get_tile_terrain(p.0, p.1));
 
-            self.tile_grid.consume_tile(p.0, p.1);
+            if let Some(terrain) = self.tile_grid.consume_tile(p.0, p.1) {
+                let mut rng = rand::thread_rng();
+                let speed: f32 = rng.gen_range(0.8, 1.0);
+                if terrain.name == "Forest" {
+                    self.audio.play_effect(PathBuf::from("../assets/sounds/woodaxe.flac"), Some(speed));
 
-            //FOREST.apply_consumed(&mut self.tile_grid, p.0, p.1);
-            //ROCKS.apply_consumed(&mut self.tile_grid, p.0, p.1);
+                } else if terrain.name == "Rocks" {
+                    self.audio.play_effect(PathBuf::from("../assets/sounds/pickaxe.flac"), Some(speed));
+                }
+            }
+
         }
 
         // Draw test map
@@ -86,6 +97,7 @@ fn main() {
 
         Map {
             tile_grid: tile_grid,
+            audio: AudioQueue::new(),
             scroll: (0, 0)
         }
 

@@ -43,7 +43,7 @@ impl Terrain {
             false
 
         } else if let Some(tile) = data.get_tile_index(x, y) {
-            if self.has_tile(tile) {
+            if self.is_group_tile(tile) || self.is_standalone_tile(tile) {
 
                 let tree = self.reduced_tile(x as u32, y as u32);
                 data.set_tile_index(x, y, tree);
@@ -97,11 +97,11 @@ impl Terrain {
                     }
                 }
 
-                return true;
+                true
 
+            } else {
+                false
             }
-
-            false
 
         } else {
             false
@@ -111,8 +111,16 @@ impl Terrain {
 
     pub fn has_tile(&self, tile: u32) -> bool {
         self.is_group_tile(tile)
-            || self.standalone.iter().any(|v| *v == tile)
+            || self.is_standalone_tile(tile)
             || self.reduced.iter().any(|v| *v == tile)
+    }
+
+    fn is_standalone_tile(&self, tile: u32) -> bool {
+        self.standalone.iter().any(|v| *v == tile)
+    }
+
+    fn is_group_tile(&self, tile: u32) -> bool {
+        self.group.iter().any(|v| *v == tile)
     }
 
     fn reduced_tile(&self, x: u32, y: u32) -> u32 {
@@ -123,10 +131,6 @@ impl Terrain {
     fn standalone_tile(&self, x: u32, y: u32) -> u32 {
         let index = (x * 67 + y * 293 + x / 5) * 13 % (self.standalone.len() as u32);
         self.standalone[index as usize]
-    }
-
-    fn is_group_tile(&self, tile: u32) -> bool {
-        self.group.iter().any(|v| *v == tile)
     }
 
     fn to_flags(&self, tiles: [u32; 8]) -> [bool; 8] {

@@ -124,23 +124,23 @@ impl TileGrid {
 
     }
 
-    pub fn consume_tile(&mut self, x: i32, y: i32) -> bool {
+    pub fn consume_tile(&mut self, x: i32, y: i32) -> Option<&Terrain> {
         if let Some(index) = self.tiledata.get_tile_index(x, y) {
             if let Some(terrain) = self.tileset.get_tile_terrain(index) {
                 if terrain.consume_tile(&mut self.tiledata, x, y) {
                     self.dirty = true;
-                    true
+                    Some(terrain)
 
                 } else {
-                    false
+                    None
                 }
 
             } else {
-                false
+                None
             }
 
         } else {
-            false
+            None
         }
     }
 
