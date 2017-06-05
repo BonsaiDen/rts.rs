@@ -9,14 +9,10 @@
 
 // Crates ---------------------------------------------------------------------
 extern crate rand;
-extern crate image;
 extern crate serde;
 extern crate clockwork;
 #[macro_use]
 extern crate serde_derive;
-
-extern crate gfx;
-extern crate gfx_device_gl;
 
 extern crate audio;
 extern crate tiles;

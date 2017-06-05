@@ -31,7 +31,7 @@ pub trait Input: Send + Copy + Clone + Debug + Serialize + DeserializeOwned {}
 pub trait State<O, I, R>: Default {
     fn is_ready(&self) -> bool;
     fn init(&mut self, HostID, &[(ConnectionID, SocketAddr)], &mut R);
-    fn tick(&mut self, HostID, &[(ConnectionID, SocketAddr)]);
+    fn tick(&mut self, u64, HostID, &[(ConnectionID, SocketAddr)]);
     fn apply_options(&mut self, HostID, &[(ConnectionID, O)]);
     fn apply_input(&mut self, HostID, ConnectionID, I);
 }

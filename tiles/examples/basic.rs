@@ -179,14 +179,38 @@ impl Unit {
     }
 
     pub fn tick(&mut self, time: u64) {
+
+        // TODO use a state machine for movement, following, harvesting, attacking etc.
+        // TODO movement is done as long there is a target(tile)
+
+        // TODO 1. harvest must go to the last known source location for the specified resource
+        // TODO initially this is set by right clicking on a resource
+            // TODO 2. the unit must find a nearby resource tile within a radius of X around the
+            // source location
+            // TODO 2a. resource tile is found
+                // TODO the resource node is created upon the first gathering tick on a resource tile
+                // TODO every X ticks a certain amount from the node is transferred to the unit
+                    // TODO if the units bucket is full go to 3.
+                    // TODO if the resource node is exhausted, repeat from 2
+
+            // TODO 2b. no resource tile is found go to 3.
+
+            // TODO 3. return to the nearest headquarter
+                // TODO once there offload the resourced and return to 1.
+                // TODO if no path to a resource tile specified in 1. is found stay at the
+                // headquarter and exit gathering mode
+
+
         if self.move_ticks == 0 {
 
             if let Some(target) = self.target.take() {
                 self.sprite.set_position(target.0 as f32 * 32.0, target.1 as f32 * 32.0);
             }
 
+            // TODO periodically re-evaluate the path to the current target
+            // TODO when following re-evaluate based on remaining distance
+            // TODO the shorter the distance the more often we should re-evaluate
             if !self.path.is_empty() {
-                // TODO diagnoal ones should cost more
                 self.origin_time = time;
                 self.origin = self.sprite.position();
                 self.target = self.path.pop();

@@ -16,7 +16,7 @@ use std::path::{Path, PathBuf};
 use rand::{XorShiftRng, SeedableRng, Rng};
 use audio::AudioQueue;
 use renderer::RenderTarget;
-use tiles::{TileData, TileGrid, TileSet};
+use tiles::{TileData, TerrainGrid, TileSet};
 use clockwork::{ConnectionID, HostID, State};
 
 
@@ -30,7 +30,7 @@ pub struct GameState {
     options: GameOptions,
     rng: XorShiftRng,
     audio: AudioQueue,
-    pub tile_grid: Option<TileGrid>
+    pub terrain: Option<TerrainGrid>
 }
 
 impl State<GameOptions, GameInput, RenderTarget> for GameState {
@@ -52,8 +52,10 @@ impl State<GameOptions, GameInput, RenderTarget> for GameState {
 
         // Setup Map rendering
         println!("[GameState] (Host {:?}) Loading map...", host_id);
+
+        // TODO cleanup
         let ts = TileSet::new(&mut target.factory, Path::new("../assets/maps/develop.tsx")).unwrap();
-        let mut tile_grid = TileGrid::new(
+        let mut terrain = TerrainGrid::new(
             &mut target.factory,
             target.color.clone(),
             target.width,
@@ -63,16 +65,15 @@ impl State<GameOptions, GameInput, RenderTarget> for GameState {
         );
 
         let m = TileData::new(Path::new("../assets/maps/develop.tmx"));
-        tile_grid.set_tiledata(m);
-
-        self.tile_grid = Some(tile_grid);
+        terrain.set_source(m);
+        self.terrain = Some(terrain);
 
         println!("[GameState] (Host {:?}) Initialized", host_id);
         self.is_ready = true;
 
     }
 
-    fn tick(&mut self, _: HostID, _: &[(ConnectionID, SocketAddr)]) {
+    fn tick(&mut self, _: u64, _: HostID, _: &[(ConnectionID, SocketAddr)]) {
         println!("[GameState] Tick");
     }
 
@@ -101,8 +102,8 @@ impl GameState {
 
     fn consume_tile(&mut self, x: i32, y: i32) {
 
-        let effect = if let Some(ref mut tile_grid) = self.tile_grid {
-            if let Some(terrain) = tile_grid.consume_tile(x, y) {
+        let effect = if let Some(ref mut terrain) = self.terrain {
+            if let Some(terrain) = terrain.consume_tile(x, y) {
                 if terrain.name == "Forest" {
                     Some(PathBuf::from("../assets/sounds/woodaxe.flac"))
 
@@ -138,8 +139,8 @@ impl GameState {
         };
 
         // Only play effect when it is within the screen bounds
-        if let Some(ref tile_grid) = self.tile_grid {
-            if tile_grid.tile_within_screen_grid(tx, ty, 1) {
+        if let Some(ref terrain) = self.terrain {
+            if terrain.tile_within_screen_grid(tx, ty, 1) {
                 self.audio.play_effect(path, speed);
             }
         }
@@ -156,7 +157,7 @@ impl Default for GameState {
             options: GameOptions::default(),
             rng: XorShiftRng::new_unseeded(),
             audio: AudioQueue::new(),
-            tile_grid: None
+            terrain: None
         }
     }
 }

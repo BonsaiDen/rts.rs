@@ -129,7 +129,7 @@ impl<S, O, I, R> ClockworkClient<S, O, I, R> where S: State<O, I, R>, O: Options
         self.input_queue.push(input);
     }
 
-    pub fn receive(&mut self, config: &Config, refs: &mut R) -> Result<Vec<Event>, Error> {
+    pub fn receive(&mut self, config: &Config, t: u64, refs: &mut R) -> Result<Vec<Event>, Error> {
 
         if self.local.timed_out(config) {
             self.network_status = NetworkStatus::Disconnected;
@@ -152,7 +152,7 @@ impl<S, O, I, R> ClockworkClient<S, O, I, R> where S: State<O, I, R>, O: Options
                 }
             }
 
-            self.apply_network_events(config, network_events, refs)
+            self.apply_network_events(config, network_events, t, refs)
 
         }
 
@@ -238,6 +238,7 @@ impl<S, O, I, R> ClockworkClient<S, O, I, R> where S: State<O, I, R>, O: Options
         &mut self,
         config: &Config,
         network_events: Vec<ClientEvent<O, I>>,
+        t: u64,
         refs: &mut R
 
     ) -> Result<Vec<Event>, Error> {
@@ -351,7 +352,7 @@ impl<S, O, I, R> ClockworkClient<S, O, I, R> where S: State<O, I, R>, O: Options
                     // Tick state
                     let connections = self.connections();
                     for _ in 0..ticks {
-                        self.state.tick(self.host_id, &connections[..]);
+                        self.state.tick(t, self.host_id, &connections[..]);
                     }
 
                 }

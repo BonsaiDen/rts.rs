@@ -123,12 +123,12 @@ impl<S, O, I, R> Clockwork<S, O, I, R> where S: State<O, I, R> + 'static,
         self.client.queue_input(input);
     }
 
-    pub fn try_recv(&mut self, refs: &mut R) -> Result<Event, TryRecvError> {
+    pub fn try_recv(&mut self, t: u64, refs: &mut R) -> Result<Event, TryRecvError> {
 
         // Initial receive after last send call
         if self.mode == Mode::Receive {
             let config = &self.config;
-            match self.client.receive(config, refs) {
+            match self.client.receive(config, t, refs) {
                 Ok(events) => {
                     for event in events {
                         self.events.push_back(event);

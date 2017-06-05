@@ -8,9 +8,7 @@
 
 
 // External Dependencies ------------------------------------------------------
-use gfx;
-use gfx_device_gl;
-use renderer::{Key, Keyboard, Button, Mouse, Renderable, RenderTarget};
+use renderer::{Key, Keyboard, Button, Mouse, Renderable, RenderTarget, Encoder};
 use clockwork::{Clockwork, Event};
 
 
@@ -44,9 +42,9 @@ impl Game {
 
 impl Renderable for Game {
 
-    fn tick(&mut self) where Self: Sized {
+    fn tick(&mut self, time: u64) where Self: Sized {
 
-        while let Ok(event) = self.client.try_recv(&mut self.target) {
+        while let Ok(event) = self.client.try_recv(time, &mut self.target) {
             match event {
                 Event::HostConnect(address, host_id, local_id) => {
                     println!("[Network] Connected to host {:?}({:?}) as {:?}, but not yet ready...", address, host_id, local_id);
@@ -79,11 +77,14 @@ impl Renderable for Game {
 
     }
 
-    fn draw(&mut self, mut encoder: &mut gfx::Encoder<
-        gfx_device_gl::Resources,
-        gfx_device_gl::CommandBuffer
+    fn draw(
+        &mut self,
+        _: u64,
+        mut encoder: &mut Encoder,
+        keyboard: &Keyboard,
+        mouse: &Mouse
 
-    >, keyboard: &Keyboard, mouse: &Mouse) where Self: Sized {
+    ) where Self: Sized {
 
         // Scrolling
         if keyboard.is_pressed(Key::A) {
@@ -103,16 +104,16 @@ impl Renderable for Game {
         }
 
         // Map
-        let input = if let Some(ref mut tile_grid) = self.client.state().tile_grid {
+        let input = if let Some(ref mut terrain) = self.client.state().terrain {
 
-            self.scroll = tile_grid.scroll_to(self.scroll.0, self.scroll.1);
+            self.scroll = terrain.scroll_to(self.scroll.0, self.scroll.1);
 
-            tile_grid.draw(&mut encoder);
+            terrain.draw(&mut encoder);
 
             // Input
             if mouse.was_pressed(Button::Left) {
                 let (x, y) = mouse.get(Button::Left).position();
-                let p = tile_grid.screen_to_grid(x, y);
+                let p = terrain.screen_to_grid(x, y);
                 Some(GameInput::LeftClick(p.0 as u8, p.1 as u8))
 
             } else {
