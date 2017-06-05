@@ -39,7 +39,8 @@ pub enum Key {
     P = 4,
     G = 5,
     B = 6,
-    Unknown = 7
+    C = 7,
+    Unknown = 8
 }
 
 impl From<VirtualKeyCode> for Key {
@@ -52,6 +53,7 @@ impl From<VirtualKeyCode> for Key {
             VirtualKeyCode::P => Key::P,
             VirtualKeyCode::G => Key::G,
             VirtualKeyCode::B => Key::B,
+            VirtualKeyCode::C => Key::C,
             _ => Key::Unknown
         }
     }

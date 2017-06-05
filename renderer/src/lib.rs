@@ -52,8 +52,8 @@ pub type Factory = gfx_device_gl::Factory;
 
 // Traits ---------------------------------------------------------------------
 pub trait Renderable {
-    fn tick(&mut self) where Self: Sized;
-    fn draw(&mut self, encoder: &mut Encoder, &Keyboard, &Mouse) where Self: Sized;
+    fn tick(&mut self, time: u64) where Self: Sized;
+    fn draw(&mut self, time: u64, encoder: &mut Encoder, &Keyboard, &Mouse) where Self: Sized;
 }
 
 pub struct RenderTarget {
@@ -100,6 +100,7 @@ pub fn run<
 
     println!("[Renderer] Window created");
 
+    let render_increase = 1000 / fps as u64;
     let frame_time = Duration::new(0, 1000000000 / fps);
     let tick_time = Duration::from_millis(1000 / tps as u64);
 
@@ -125,6 +126,7 @@ pub fn run<
 
     let mut last_tick = Instant::now();
     let mut running = true;
+    let mut render_time: u64 = 0;
 
     println!("[Renderer] Mainloop started");
     while running {
@@ -171,12 +173,12 @@ pub fn run<
         // Tick
         if last_tick.elapsed() >= tick_time {
             last_tick = Instant::now();
-            renderable.tick();
+            renderable.tick(render_time);
         }
 
         // Draw
         encoder.clear(&output_color, [1.0, 0.0, 1.0, 1.0]);
-        renderable.draw(&mut encoder, &keyboard, &mouse);
+        renderable.draw(render_time, &mut encoder, &keyboard, &mouse);
         encoder.flush(&mut device);
         window.swap_buffers().unwrap();
         device.cleanup();
@@ -189,6 +191,8 @@ pub fn run<
         } else {
             println!("Exceeded frame time: {:?}", started.elapsed());
         }
+
+        render_time += render_increase;
 
     }
 
